@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ENUM para definir a função de cada usuário.
+enum UserRole {
+  customer
+  sale
+}
+
+enum DeliveryStatus {
+  processing
+  shipped
+  delivered
+}
+
+// Table users
+model User {
+  id       String @id @default(uuid())
+  name     String
+  email    String
+  password String
+
+  // Definindo a role com base no Enum
+  role UserRole @default(customer)
+
+  // Criando um campo que recebe a data e hora atual ao inserir um registro
+  createdAt DateTime   @default(now()) @map("created_at")
+  // Criando um campo que atualiza a data e hora para o momento em que ele foi alterado
+  updatedAt DateTime   @updatedAt @map("updated_at")
+  Delivery  Delivery[]
+
+  // Mapeando o nome da table no banco de dados.
+  @@map("users")
+}
+
+model Delivery {
+  id          String @id @default(uuid())
+  userId      String @map("user_id")
+  description String
+
+  status DeliveryStatus @default(processing)
+
+  user User @relation(fields: [userId], references: [id])
+
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  DeliveryLog DeliveryLog[]
+
+  @@map("deliveries")
+}
+
+model DeliveryLog {
+  id          String @id @default(uuid())
+  description String
+  deliveryId  String @map("delivery_id")
+
+  delivery Delivery @relation(fields: [deliveryId], references: [id])
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("delivery_logs")
+}
