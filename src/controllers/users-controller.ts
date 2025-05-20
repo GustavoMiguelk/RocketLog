@@ -35,7 +35,7 @@ export class UsersController{
 
         const { password: _, ...userWithoutPassword} = user
 
-        return response.json({ userWithoutPassword })
+        response.status(201).json({ userWithoutPassword })
     }
 }
 
